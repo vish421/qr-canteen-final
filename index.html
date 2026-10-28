@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QuickBite • Table B-14 Dynamic Food Menu</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#9d4300",
+            "secondary": "#006c49",
+            "surface-bright": "#faf8ff",
+            "secondary-container": "#6cf8bb",
+            "on-secondary-fixed": "#002113",
+            "on-surface": "#131b2e",
+            "surface-container-low": "#f2f3ff",
+            "surface-container": "#eaedff",
+            "surface-container-high": "#e2e7ff",
+            "surface-container-highest": "#dae2fd",
+            "surface": "#faf8ff",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#ffffff",
+            "primary": "#9d4300",
+            "primary-container": "#f97316",
+            "primary-fixed": "#ffdbca",
+            "on-primary-fixed": "#341100",
+            "tertiary-container": "#ff6d2c",
+            "outline-variant": "#e0c0b1",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+            "on-surface-variant": "#584237",
+            "inverse-surface": "#283044",
+            "inverse-on-surface": "#eef0ff",
+            "secondary-fixed": "#6ffbbe"
+          },
+          "fontFamily": {
+            "sans": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+</script>
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+    @keyframes pop {
+      0% { transform: scale(0.9); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .badge-pop { animation: pop 0.25s ease-out; }
+</style>
+</head>
+<body class="bg-surface text-on-surface antialiased font-sans select-none min-h-screen flex flex-col justify-between overflow-x-hidden">
+<!-- TOAST NOTIFICATION -->
+<div class="fixed top-20 right-4 z-50 transform translate-y-[-20px] opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-inverse-surface text-inverse-on-surface shadow-xl text-xs font-semibold" id="toastNotification">
+<span class="material-symbols-outlined text-[18px] text-secondary-fixed" id="toastIcon">check_circle</span>
+<span id="toastMsg">Notification</span>
+</div>
+<!-- SIMPLIFIED, CLEAR TOP HEADER -->
+<header class="bg-surface-bright/95 backdrop-blur-md sticky top-0 z-40 border-b border-outline-variant/30 shadow-xs">
+<div class="max-w-7xl mx-auto px-4 py-2.5 sm:py-3 flex items-center justify-between gap-4">
+<!-- Brand & Prominent Table Badge Headline -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-white flex items-center justify-center font-extrabold text-base shrink-0 shadow-sm">
+      QB
+    </div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-base sm:text-lg font-extrabold text-on-surface tracking-tight">QuickBite</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-container text-white font-extrabold text-xs shadow-xs">
+<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+<span id="headerTableName">Table B-14</span>
+</div>
+<span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-secondary-container text-on-secondary-fixed" id="headerZoneName">Zone 2 North</span>
+</div>
+<p class="text-[11px] sm:text-xs text-on-surface-variant font-medium mt-0.5">
+        Your Active Dining Table • Order delivers directly here
+      </p>
+</div>
+</div>
+<!-- Search Input on Desktop -->
+<div class="hidden md:flex flex-1 max-w-sm mx-2">
+<div class="relative w-full flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-surface-container-lowest pl-9 pr-9 py-1.5 rounded-full border border-outline-variant/40 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container shadow-xs transition-all" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search rolls, biryani, noodles..." type="search"/>
+<button class="hidden absolute right-3 text-on-surface-variant hover:text-primary cursor-pointer" id="clearSearch" onclick="clearSearchInput()">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<!-- Right Essentials: Veg Toggle & Tray Pill -->
+<div class="flex items-center gap-2.5">
+<!-- Pure Veg Toggle -->
+<label class="flex items-center gap-1.5 sm:gap-2 bg-surface-container-lowest px-2.5 sm:px-3 py-1.5 rounded-full border border-outline-variant/40 shadow-xs cursor-pointer hover:border-secondary transition-all select-none">
+<span class="w-3.5 h-3.5 rounded border border-emerald-600 flex items-center justify-center p-[1px]">
+<span class="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
+</span>
+<span class="text-[11px] sm:text-xs font-bold text-on-surface-variant">PURE VEG</span>
+<div class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="vegSwitch" onchange="toggleVegOnly(this.checked)" type="checkbox"/>
+<div class="w-7 h-4 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-secondary"></div>
+</div>
+</label>
+<!-- Mobile Tray Shortcut Button -->
+<button class="relative md:hidden w-9 h-9 rounded-full bg-surface-container-lowest border border-outline-variant/40 flex items-center justify-center text-primary active:scale-95 transition-transform shadow-xs cursor-pointer" onclick="toggleMobileDrawer()">
+<span class="material-symbols-outlined text-[20px]">shopping_basket</span>
+<span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary-container text-white text-[10px] font-bold flex items-center justify-center shadow-xs badge-pop" id="mobileCartBadge">3</span>
+</button>
+</div>
+</div>
+<!-- Simple Mobile Search Field -->
+<div class="md:hidden px-4 pb-2.5">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-surface-container-lowest pl-9 pr-8 py-1.5 rounded-full border border-outline-variant/40 text-xs text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-2 focus:ring-primary-container shadow-xs" id="mobileSearchInput" oninput="handleSearch(this.value)" placeholder="Search rolls, biryani, noodles..." type="search"/>
+</div>
+</div>
+</header>
+<!-- MAIN APP BODY -->
+<div class="max-w-7xl mx-auto px-4 py-4 w-full flex-1">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- LEFT PANEL: FILTERS & FOOD CARD GRID (lg:col-span-8) -->
+<main class="lg:col-span-8 space-y-4">
+<!-- Quick Pill Filter Tags -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="filterPillsContainer">
+<button class="pill-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold whitespace-nowrap active:scale-95 transition-all border border-primary/20 shadow-xs cursor-pointer" onclick="applyFilterTag('all', this)">
+<span class="material-symbols-outlined text-[15px]">restaurant</span>
+<span>All 100+ Dishes</span>
+</button>
+<button class="pill-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant text-xs font-semibold whitespace-nowrap active:scale-95 transition-all border border-outline-variant/40 shadow-xs hover:border-primary cursor-pointer" onclick="applyFilterTag('special', this)">
+<span class="material-symbols-outlined text-[15px]">local_fire_department</span>
+<span>Chef Specials</span>
+</button>
+<button class="pill-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant text-xs font-semibold whitespace-nowrap active:scale-95 transition-all border border-outline-variant/40 shadow-xs hover:border-primary cursor-pointer" onclick="applyFilterTag('under99', this)">
+<span>⚡ Under ₹99</span>
+</button>
+<button class="pill-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant text-xs font-semibold whitespace-nowrap active:scale-95 transition-all border border-outline-variant/40 shadow-xs hover:border-primary cursor-pointer" onclick="applyFilterTag('fast', this)">
+<span>⏱ Fast Prep (&lt;6m)</span>
+</button>
+<button class="pill-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant text-xs font-semibold whitespace-nowrap active:scale-95 transition-all border border-outline-variant/40 shadow-xs hover:border-primary cursor-pointer" onclick="applyFilterTag('bestseller', this)">
+<span>⭐ Bestsellers</span>
+</button>
+</div>
+<!-- HORIZONTAL 8 CATEGORIES CAROUSEL -->
+<section>
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-sm font-bold text-on-surface tracking-tight">Explore 8 Live Canteen Counters</h2>
+<span class="text-xs font-bold text-primary" id="itemsCountLabel">101 Available (60 Veg • 41 Non-Veg)</span>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1" id="categoryContainer">
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-container text-white shadow-xs shrink-0 cursor-pointer transition-all active:scale-95" onclick="selectCategory('all', this)">
+<span class="material-symbols-outlined text-[17px]">lunch_dining</span>
+<span class="text-xs font-bold whitespace-nowrap">🔥 All Hits</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('rolls', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🌯 Rolls &amp; Wraps</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('bowls', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🍲 Bowls &amp; Biryani</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('burgers', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🍔 Burgers &amp; Sandwiches</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('pizzas', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🍕 Pizzas</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('chinese', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🍜 Noodles &amp; Chinese</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('breakfast', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🥞 Breakfast &amp; Chaat</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('shakes', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🥤 Shakes &amp; Coffee</span>
+</button>
+<button class="cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95" onclick="selectCategory('desserts', this)">
+<span class="text-xs font-semibold whitespace-nowrap">🍨 Desserts</span>
+</button>
+</div>
+</section>
+<!-- LIVE CAMPUS RUSH BANNER -->
+<section class="bg-gradient-to-r from-primary-fixed/80 via-primary-fixed/40 to-surface-container-low rounded-2xl p-3 border border-outline-variant/30 flex items-center justify-between shadow-xs">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">⚡</div>
+<div>
+<div class="text-xs font-bold text-on-primary-fixed flex items-center gap-1.5">
+<span>Table Service Active</span>
+<span class="px-1.5 py-0.5 rounded bg-primary text-white text-[9px]">CAMPUS20</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-tight">Orders will be brought directly to Table B-14 • Fast express kitchen</p>
+</div>
+</div>
+<span class="text-xs font-bold text-secondary bg-surface-container-lowest px-2.5 py-1 rounded-lg border border-secondary/20 shrink-0">~8-12 min prep</span>
+</section>
+<!-- FOOD ITEM FEED -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="text-base font-bold text-on-surface flex items-center gap-2">
+<span id="sectionHeaderTitle">Campus Specials &amp; Hits</span>
+<span class="text-xs font-semibold text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-full" id="itemsRatioBadge">101 Dishes</span>
+</h3>
+<span class="text-xs font-semibold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">bolt</span>
+            Express Kitchen Serving
+          </span>
+</div>
+<!-- Dynamic Food Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3.5" id="foodGrid">
+<!-- Populated by JavaScript -->
+</div>
+<!-- Load More Pagination Button -->
+<div class="text-center py-3" id="loadMoreSection">
+<button class="px-5 py-2 rounded-full border border-primary/30 text-primary font-bold text-xs hover:bg-primary-fixed/30 transition-all cursor-pointer" onclick="loadMoreItems()">
+            Load More Dishes (<span id="remainingDishesCount">77</span> left)
+          </button>
+</div>
+</section>
+</main>
+<!-- RIGHT PANEL: PERSISTENT STICKY CART / CHECKOUT CALCULATOR (lg:col-span-4) -->
+<aside class="lg:col-span-4 sticky top-20 hidden lg:block" id="desktopTrayContainer">
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/40 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden">
+<!-- Active Order Quick Status Pill -->
+<div class="bg-inverse-surface text-inverse-on-surface px-4 py-2 flex items-center justify-between border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
+</span>
+<span class="text-xs font-bold text-secondary-fixed">Token #42</span>
+<span class="text-outline-variant text-[11px]">•</span>
+<span class="text-xs truncate text-inverse-on-surface">Kitchen Griddling</span>
+</div>
+<span class="text-xs text-primary-fixed font-bold">Delivering to B-14</span>
+</div>
+<!-- Drawer Header Bar -->
+<div class="bg-primary-container text-white px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[22px]">shopping_basket</span>
+<span class="text-sm font-bold tracking-tight">My Tray (<span id="trayItemCount">3</span> items)</span>
+<span class="text-[11px] bg-white/20 px-2 py-0.5 rounded-full font-bold">Table B-14</span>
+</div>
+<div class="text-base font-extrabold" id="trayHeaderTotal">₹353.85</div>
+</div>
+<!-- Scrollable Tray Body -->
+<div class="p-4 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar">
+<!-- Itemized Dynamic Tray List -->
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ordered Items</span>
+<button class="text-xs text-error font-medium hover:underline cursor-pointer" onclick="clearCart()">Clear All</button>
+</div>
+<div class="space-y-2.5 divide-y divide-outline-variant/20" id="cartItemList">
+<!-- Populated dynamically -->
+</div>
+</div>
+<!-- Applied Coupon Badge with Toggle Button -->
+<div class="flex items-center justify-between bg-secondary-container/30 border border-secondary/30 p-2.5 rounded-xl">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]">sell</span>
+<div>
+<span class="text-xs font-bold block leading-none">CAMPUS20 Voucher</span>
+<span class="text-[10px] text-on-surface-variant">Flat ₹35 off on orders &gt; ₹199</span>
+</div>
+</div>
+<button class="text-xs font-bold text-secondary px-2 py-1 rounded bg-surface-container-lowest border border-secondary/40 hover:bg-secondary-container/40 transition-colors cursor-pointer" id="toggleCouponBtn" onclick="toggleCoupon()">
+              Applied (-₹35)
+            </button>
+</div>
+<!-- Clear GST Calculation Box -->
+<div class="bg-surface-container-low rounded-xl p-3 border border-outline-variant/30 text-xs space-y-1.5">
+<div class="flex justify-between text-on-surface-variant">
+<span>Item Subtotal</span>
+<span class="font-semibold text-on-surface" id="billSubtotal">₹357.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Eco Packaging &amp; Tray Fee</span>
+<span id="billPackaging">₹15.00</span>
+</div>
+<div class="flex justify-between text-secondary font-medium" id="billDiscountRow">
+<span>Campus Coupon Savings</span>
+<span id="billDiscount">-₹35.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant border-t border-outline-variant/30 pt-1.5">
+<span>Taxable Amount</span>
+<span class="font-bold text-on-surface" id="billTaxable">₹337.00</span>
+</div>
+<!-- Detailed GST Components -->
+<div class="flex justify-between text-[11px] text-on-surface-variant pl-1">
+<span>• CGST (2.5%)</span>
+<span id="billCgst">₹8.43</span>
+</div>
+<div class="flex justify-between text-[11px] text-on-surface-variant pl-1">
+<span>• SGST (2.5%)</span>
+<span id="billSgst">₹8.43</span>
+</div>
+<div class="flex justify-between text-[11px] font-bold text-primary pt-1 border-t border-outline-variant/20">
+<span>Total GST (5.0%)</span>
+<span id="billTotalGst">₹16.85</span>
+</div>
+<div class="flex justify-between items-baseline pt-2 border-t border-outline-variant/40">
+<div>
+<span class="text-sm font-bold text-on-surface">Grand Total</span>
+<span class="text-[10px] text-on-surface-variant block font-normal">(Inclusive of 5% Canteen GST)</span>
+</div>
+<span class="text-xl font-extrabold text-primary" id="billGrandTotal">₹353.85</span>
+</div>
+</div>
+<!-- Live Receipt & Token Method Selector with EDITABLE PHONE INPUT -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Send Live Token &amp; E-Receipt To:</label>
+<button class="text-[10px] font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer" onclick="toggleNumpad()" type="button">
+<span class="material-symbols-outlined text-[13px]">dialpad</span>
+<span>Keypad</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-2" id="receiptSelector">
+<label class="flex items-center gap-1.5 p-2 rounded-xl border-2 border-secondary bg-surface-container-lowest cursor-pointer shadow-2xs transition-all" id="label-receipt-wa" onclick="setReceiptMethod('whatsapp')">
+<input checked="" class="text-secondary focus:ring-secondary h-3.5 w-3.5 cursor-pointer" name="receiptMethod" type="radio" value="whatsapp"/>
+<div class="truncate">
+<span class="text-[11px] font-bold text-on-surface flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> WhatsApp
+                  </span>
+<span class="text-[10px] text-on-surface-variant block truncate">Direct PDF Ticket</span>
+</div>
+</label>
+<label class="flex items-center gap-1.5 p-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest cursor-pointer shadow-2xs transition-all" id="label-receipt-sms" onclick="setReceiptMethod('sms')">
+<input class="text-primary focus:ring-primary h-3.5 w-3.5 cursor-pointer" name="receiptMethod" type="radio" value="sms"/>
+<div class="truncate">
+<span class="text-[11px] font-bold text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">sms</span> SMS Text
+                  </span>
+<span class="text-[10px] text-on-surface-variant block truncate">Cellular SIM</span>
+</div>
+</label>
+</div>
+<!-- Fully Functional, Editable Phone Input Container -->
+<div class="mt-1.5">
+<div class="relative flex items-center rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-3 py-2 focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary transition-all shadow-xs">
+<span class="text-xs font-bold text-slate-500 shrink-0 select-none mr-2 flex items-center gap-1 border-r border-outline-variant/30 pr-2">
+<span class="material-symbols-outlined text-[14px] text-slate-400">call</span>
+                  +91
+                </span>
+<input class="w-full bg-transparent outline-none font-semibold text-slate-800 text-sm tracking-wider cursor-text" id="user-phone-input" maxlength="10" oninput="handlePhoneInput(this.value)" placeholder="Enter 10-digit mobile" type="tel" value="9820154321"/>
+<button class="shrink-0 w-5 h-5 rounded-full hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors ml-1 cursor-pointer" onclick="clearPhoneNumber()" title="Clear Phone Number" type="button">
+<span class="text-xs font-bold leading-none">✕</span>
+</button>
+</div>
+<!-- Interactive Numpad -->
+<div class="hidden mt-2 p-2 bg-surface-container-low rounded-xl border border-outline-variant/30" id="quickNumpadTray">
+<div class="flex justify-between items-center mb-1 px-1">
+<span class="text-[10px] font-bold text-slate-500 uppercase">Quick Numpad Tap</span>
+<span class="text-[10px] text-slate-400 font-mono" id="phoneCharCount">10/10</span>
+</div>
+<div class="grid grid-cols-6 gap-1">
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('1')" type="button">1</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('2')" type="button">2</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('3')" type="button">3</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('4')" type="button">4</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('5')" type="button">5</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('6')" type="button">6</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('7')" type="button">7</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('8')" type="button">8</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('9')" type="button">9</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer" onclick="tapNumpad('0')" type="button">0</button>
+<button class="py-1 text-xs font-bold bg-surface-container-lowest rounded border border-outline-variant/30 hover:bg-primary-fixed/40 cursor-pointer text-error" onclick="tapNumpad('backspace')" type="button">⌫</button>
+<button class="py-1 text-xs font-bold bg-secondary-container text-on-secondary-fixed rounded border border-secondary/30 hover:bg-secondary-fixed cursor-pointer" onclick="tapNumpad('sample')" title="Fill Sample" type="button">Fill</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment Method Quick Selector -->
+<div class="space-y-1.5">
+<label class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Choose Payment Mode:</label>
+<div class="grid grid-cols-3 gap-1.5" id="paymentSelector">
+<button class="pay-btn p-2 rounded-xl border-2 border-primary bg-primary-fixed/40 text-left transition-all cursor-pointer" id="pay-wallet" onclick="selectPayment('wallet')">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[15px]">account_balance_wallet</span>
+<span class="text-[11px] font-bold">Wallet</span>
+</div>
+<span class="text-[9px] text-secondary font-bold block mt-0.5">Extra 5% Off</span>
+</button>
+<button class="pay-btn p-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-left hover:border-primary transition-all cursor-pointer" id="pay-upi" onclick="selectPayment('upi')">
+<div class="flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[15px]">qr_code_2</span>
+<span class="text-[11px] font-bold">UPI QR</span>
+</div>
+<span class="text-[9px] text-on-surface-variant block mt-0.5">GPay/PhonePe</span>
+</button>
+<button class="pay-btn p-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-left hover:border-primary transition-all cursor-pointer" id="pay-cash" onclick="selectPayment('cash')">
+<div class="flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[15px]">payments</span>
+<span class="text-[11px] font-bold">Counter</span>
+</div>
+<span class="text-[9px] text-on-surface-variant block mt-0.5">Pay at Desk</span>
+</button>
+</div>
+</div>
+<!-- Primary Pay Button -->
+<button class="w-full py-3 px-4 rounded-full bg-primary-container hover:bg-tertiary-container active:scale-[0.98] transition-transform text-white text-sm font-bold flex items-center justify-between shadow-[0_4px_16px_rgba(249,115,22,0.35)] cursor-pointer" id="mainPayBtn" onclick="processOrder()">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+<span id="payBtnLabel">Pay ₹336.16 &amp; Place Order</span>
+</div>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<p class="text-[10px] text-center text-on-surface-variant font-medium">Delivers directly to Table B-14 upon preparation.</p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<!-- MOBILE BOTTOM FLOATING TRAY BAR & EXPANDABLE DRAWER -->
+<div class="lg:hidden fixed bottom-14 left-0 right-0 z-40 px-3 pointer-events-none">
+<!-- Mobile Status Token Strip -->
+<div class="pointer-events-auto mb-2 bg-inverse-surface text-inverse-on-surface rounded-full px-3.5 py-1.5 flex items-center justify-between shadow-lg border border-outline-variant/20 text-xs">
+<div class="flex items-center gap-2 truncate">
+<span class="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+<span class="font-bold text-secondary-fixed">Table B-14</span>
+<span>• Token #42 In Progress</span>
+</div>
+<span class="text-primary-container font-bold shrink-0 cursor-pointer" onclick="toggleMobileDrawer()">View</span>
+</div>
+<!-- Mobile Floating Trigger Card -->
+<div class="pointer-events-auto bg-surface-container-lowest rounded-2xl border border-outline-variant/40 shadow-[0_10px_25px_rgba(249,115,22,0.25)] overflow-hidden">
+<div class="bg-primary-container text-white px-4 py-2.5 flex items-center justify-between cursor-pointer" onclick="toggleMobileDrawer()">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">shopping_basket</span>
+<span class="text-xs font-bold">My Tray (<span id="mobTrayCount">3</span> items)</span>
+<span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-bold">Table B-14</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-extrabold" id="mobTrayTotal">₹336.16</span>
+<span class="material-symbols-outlined text-[18px] transition-transform duration-200" id="mobChevron">expand_less</span>
+</div>
+</div>
+<!-- Mobile Collapsible Content Container -->
+<div class="hidden p-3.5 space-y-3 bg-surface-container-lowest max-h-[70vh] overflow-y-auto no-scrollbar border-t border-outline-variant/20" id="mobDrawerBody">
+<div class="space-y-2 divide-y divide-outline-variant/20 text-xs" id="mobileCartItemList">
+<!-- Populated dynamically -->
+</div>
+<div class="bg-surface-container-low rounded-xl p-2.5 text-xs space-y-1">
+<div class="flex justify-between text-on-surface-variant">
+<span>Subtotal</span>
+<span id="mobSubtotal">₹357.00</span>
+</div>
+<div class="flex justify-between text-secondary">
+<span>Coupon (CAMPUS20)</span>
+<span id="mobDiscount">-₹35.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>5% GST (CGST + SGST)</span>
+<span id="mobGst">₹16.85</span>
+</div>
+<div class="flex justify-between font-bold text-sm text-primary pt-1 border-t border-outline-variant/30">
+<span>Grand Total</span>
+<span id="mobGrandTotal">₹336.16</span>
+</div>
+</div>
+<!-- Mobile Phone Input Sync -->
+<div class="bg-surface-container-low p-2 rounded-xl border border-outline-variant/30">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase block mb-1">Receipt Mobile:</span>
+<div class="flex items-center bg-surface-container-lowest px-2.5 py-1.5 rounded-lg border border-outline-variant/40">
+<span class="text-xs font-bold text-slate-500 mr-2">+91</span>
+<input class="w-full bg-transparent outline-none font-semibold text-xs text-slate-800 tracking-wider" id="user-phone-input-mobile" maxlength="10" oninput="handlePhoneInput(this.value)" placeholder="10-digit number" type="tel" value="9820154321"/>
+</div>
+</div>
+<button class="w-full py-2.5 px-4 rounded-full bg-primary-container hover:bg-tertiary-container active:scale-95 transition-transform text-white text-xs font-bold flex items-center justify-between shadow-md cursor-pointer" onclick="processOrder()">
+<span id="mobPayBtnLabel">Pay ₹336.16 &amp; Place Order</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BOTTOM NAVIGATION BAR (Cleaned - QR Tab Removed) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 py-2 pb-safe bg-surface-container-lowest border-t border-outline-variant/20 shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
+<a class="flex flex-col items-center justify-center bg-primary-fixed text-on-primary-fixed rounded-full px-5 py-1 font-bold active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+<span class="text-[11px]">Menu</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors active:scale-95" href="#" onclick="openReceiptModal(); return false;">
+<div class="relative">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-primary-container text-white text-[9px] font-bold flex items-center justify-center">1</span>
+</div>
+<span class="text-[11px] font-semibold">My Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors active:scale-95" href="#" onclick="showToast('Wallet balance: ₹850.00 (Student RFID linked)', 'account_balance_wallet'); return false;">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="text-[11px] font-semibold">Wallet</span>
+</a>
+</nav>
+<!-- ORDER SUCCESS & LIVE TOKEN MODAL POPUP -->
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" id="orderModal">
+<div class="bg-surface-container-lowest rounded-3xl max-w-md w-full p-6 shadow-2xl border border-outline-variant/30 text-center transform scale-95 transition-transform duration-200 overflow-hidden" id="modalCard"><div class="w-16 h-16 rounded-full bg-secondary-container text-secondary flex items-center justify-center mx-auto mb-3 shadow-sm"><span class="material-symbols-outlined text-[36px]">check_circle</span></div><h3 class="text-xl font-extrabold text-on-surface">Order Placed Successfully!</h3><p class="text-xs text-on-surface-variant mt-0.5">Your kitchen ticket is registered and in active preparation.</p><div class="my-3.5 bg-gradient-to-br from-primary-fixed/60 to-primary-fixed/20 border-2 border-dashed border-primary/40 rounded-2xl p-3.5 text-center"><div class="text-[10px] uppercase tracking-wider text-on-primary-fixed font-bold">Active Kitchen Token</div><div class="text-2xl sm:text-3xl font-extrabold text-primary my-1 tracking-tight">Token #42</div><div class="text-xs font-bold text-slate-700">(Griddling &amp; Packing ~8-10 min)</div><div class="mt-2 pt-2 border-t border-primary/20 flex items-center justify-center gap-2 text-xs font-semibold text-secondary"><span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span><span class="font-bold">Assigned Dining Table: Table B-14 (Zone 2 North)</span></div></div><div class="my-3 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-left flex items-start gap-2.5"><div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs"><span class="material-symbols-outlined text-[20px]">chat</span></div><div class="flex-1 min-w-0"><div class="text-xs font-bold text-emerald-900 flex items-center gap-1.5"><span>WhatsApp E-Receipt Dispatched</span><span class="px-1.5 py-0.2 rounded bg-emerald-200/80 text-emerald-950 text-[9px] font-mono font-bold">SENT</span></div><div class="text-xs font-bold text-emerald-700 truncate mt-0.5">Digital Tax Invoice Dispatched to WhatsApp (+91 9820154321)</div><div class="text-[10px] text-emerald-800/80 mt-0.5">Includes instant PDF tax invoice, live token status &amp; direct table delivery ticket.</div></div></div><div class="text-left bg-surface-container-low border border-outline-variant/30 rounded-2xl p-3 text-xs space-y-2 mb-3.5"><div class="flex justify-between items-center pb-1.5 border-b border-outline-variant/20"><span class="font-bold text-on-surface uppercase text-[10px] tracking-wider">Ordered Items (3 items)</span><span class="text-[10px] text-secondary font-bold">Table B-14 Delivery</span></div><div class="space-y-1.5 text-xs"><div class="flex justify-between items-center"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-600 shrink-0"></span><span class="font-medium text-slate-800">1x Crispy Paneer Makhani Roll</span></div><span class="font-bold text-slate-900">₹149.00</span></div><div class="flex justify-between items-center"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-600 shrink-0"></span><span class="font-medium text-slate-800">1x Schezwan Veg Loaded Noodles</span></div><span class="font-bold text-slate-900">₹119.00</span></div><div class="flex justify-between items-center"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-600 shrink-0"></span><span class="font-medium text-slate-800">1x Classic Cold Coffee with Ice Cream</span></div><span class="font-bold text-slate-900">₹89.00</span></div></div><div class="pt-2 border-t border-outline-variant/20 space-y-1 text-[11px] text-on-surface-variant"><div class="flex justify-between"><span>Subtotal</span><span class="font-semibold text-slate-800">₹357.00</span></div><div class="flex justify-between"><span>Eco Packaging Fee</span><span class="font-semibold text-slate-800">₹15.00</span></div><div class="flex justify-between text-secondary font-medium"><span>CAMPUS20 Voucher Savings</span><span>-₹35.00</span></div><div class="flex justify-between text-slate-600 pt-1 border-t border-outline-variant/20"><span>• CGST (2.5%)</span><span>₹8.43</span></div><div class="flex justify-between text-slate-600"><span>• SGST (2.5%)</span><span>₹8.43</span></div><div class="flex justify-between items-baseline pt-1.5 border-t border-outline-variant/30 text-xs font-bold text-on-surface"><span>Grand Total Paid</span><span class="text-primary font-extrabold text-base">₹353.85</span></div></div></div><div class="flex flex-col gap-2"><button class="w-full py-2.5 px-4 rounded-full bg-secondary text-white font-bold text-xs hover:bg-secondary/90 shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer" onclick="openReceiptModal()"><span class="material-symbols-outlined text-[17px]">picture_as_pdf</span><span>View &amp; Download PDF Receipt</span></button><div class="flex gap-2"><button class="flex-1 py-2 px-3 rounded-full bg-primary-container text-white font-bold text-xs hover:bg-tertiary-container shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer" onclick="showToast('Kitchen Status: Griddling parotta &amp; brewing fresh coffee', 'soup_kitchen')"><span class="material-symbols-outlined text-[16px]">skillet</span><span>Track Kitchen Status</span></button><button class="flex-1 py-2 px-3 rounded-full border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-semibold text-xs hover:bg-surface-container-low transition-all cursor-pointer" onclick="closeOrderModal()">Done / Close</button></div></div></div>
+</div>
+<!-- DETAILED ITEMIZED PDF RECEIPT MODAL -->
+<div class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 hidden" id="receiptModal">
+<div class="bg-surface-container-lowest rounded-3xl max-w-md w-full p-6 shadow-2xl border border-outline-variant/40 text-left transform scale-95 transition-transform duration-200 max-h-[90vh] overflow-y-auto no-scrollbar" id="receiptModalCard">
+<div class="flex items-center justify-between pb-3 border-b border-dashed border-outline-variant/40">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-white flex items-center justify-center font-black text-sm">QB</div>
+<div>
+<h4 class="text-sm font-extrabold text-on-surface">QuickBite Campus Canteen</h4>
+<p class="text-[10px] text-on-surface-variant">FSSAI Lic #11521083000412 • GSTIN: 27AABCT3521Q1Z4</p>
+</div>
+</div>
+<button class="w-7 h-7 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-error transition-colors cursor-pointer" onclick="closeReceiptModal()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Receipt Meta Details -->
+<div class="grid grid-cols-2 gap-2 my-3 py-2 bg-surface-container-low rounded-xl px-3 text-[11px] text-on-surface-variant">
+<div>
+<span class="block text-slate-400 text-[10px]">ORDER &amp; TABLE</span>
+<span class="font-bold text-slate-800" id="receiptTableDetail">Table B-14 (Zone 2 North)</span>
+</div>
+<div class="text-right">
+<span class="block text-slate-400 text-[10px]">LIVE KITCHEN TOKEN</span>
+<span class="font-extrabold text-primary">Token #42</span>
+</div>
+<div>
+<span class="block text-slate-400 text-[10px]">DATE &amp; TIME</span>
+<span class="font-medium text-slate-700">Today, 01:15 PM</span>
+</div>
+<div class="text-right">
+<span class="block text-slate-400 text-[10px]">DISPATCHED TO</span>
+<span class="font-bold text-slate-800" id="receiptPhoneDetail">+91 98201 54321</span>
+</div>
+</div>
+<!-- Itemized List Table -->
+<div class="space-y-2 mb-3">
+<div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-outline-variant/30 pb-1">
+<span>Item Details</span>
+<span>Amount (₹)</span>
+</div>
+<div class="space-y-1.5 divide-y divide-outline-variant/20 text-xs" id="receiptItemList">
+<!-- Dynamically inserted -->
+</div>
+</div>
+<!-- Calculations breakdown including CGST & SGST 5% -->
+<div class="border-t-2 border-dashed border-outline-variant/40 pt-2 space-y-1 text-xs text-on-surface-variant">
+<div class="flex justify-between">
+<span>Item Subtotal</span>
+<span class="font-semibold text-on-surface" id="receiptSubtotal">₹357.00</span>
+</div>
+<div class="flex justify-between">
+<span>Campus Coupon Discount (CAMPUS20)</span>
+<span class="text-secondary font-medium" id="receiptDiscount">-₹35.00</span>
+</div>
+<div class="flex justify-between">
+<span>Eco Packaging Fee</span>
+<span>₹15.00</span>
+</div>
+<div class="flex justify-between font-bold text-slate-700 border-t border-outline-variant/20 pt-1">
+<span>Net Taxable Base</span>
+<span id="receiptTaxable">₹337.00</span>
+</div>
+<div class="flex justify-between text-[11px] pl-2 text-slate-600">
+<span>• CGST (2.5% Campus Food)</span>
+<span id="receiptCgst">₹8.43</span>
+</div>
+<div class="flex justify-between text-[11px] pl-2 text-slate-600">
+<span>• SGST (2.5% Campus Food)</span>
+<span id="receiptSgst">₹8.43</span>
+</div>
+<div class="flex justify-between text-[11px] font-semibold text-primary pl-2">
+<span>Total GST (5.0%)</span>
+<span id="receiptTotalGst">₹16.85</span>
+</div>
+<div class="flex justify-between items-baseline pt-2 border-t border-outline-variant/40 font-extrabold text-base text-slate-900">
+<span>Total Paid</span>
+<span class="text-primary text-lg" id="receiptGrandTotal">₹336.16</span>
+</div>
+</div>
+<!-- Verified Badge -->
+<div class="mt-4 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs text-emerald-800">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+<span class="font-bold">E-Receipt Dispatched &amp; Authenticated</span>
+</div>
+<span class="text-[10px] uppercase font-mono font-bold bg-emerald-200/60 px-1.5 py-0.5 rounded text-emerald-900">PAID</span>
+</div>
+<!-- Actions -->
+<div class="flex gap-2 mt-4">
+<button class="flex-1 py-2 rounded-full bg-primary-container text-white font-bold text-xs hover:bg-tertiary-container shadow-md transition-all flex items-center justify-center gap-1 cursor-pointer" onclick="window.print()">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>Download Receipt PDF</span>
+</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant/40 text-on-surface font-semibold text-xs hover:bg-surface-container-low transition-all cursor-pointer" onclick="closeReceiptModal()">
+        Done
+      </button>
+</div>
+</div>
+</div>
+<!-- ================= SCRIPT LOGIC ================= -->
+<script>
+  // High reliability Fallback SVG generator
+  const FALLBACK_FOOD_IMG = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23ffdbca'/%3E%3Ccircle cx='200' cy='150' r='80' fill='%23f97316' opacity='0.25'/%3E%3Ctext x='50%25' y='48%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='48'%3E%F0%9F%8D%B2%3C/text%3E%3Ctext x='50%25' y='72%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' font-weight='bold' fill='%239d4300'%3EQuickBite Fresh%3C/text%3E%3C/svg%3E";
+
+  // Menu database mapped strictly to DataStore placeholders for verified recipes
+  const MENU_ITEMS = [
+    { 
+      id: "paneer-roll", 
+      name: "Crispy Paneer Makhani Roll", 
+      category: "rolls", 
+      veg: true, 
+      price: 149, 
+      originalPrice: 179, 
+      prepTime: "7m prep", 
+      rating: "4.9", 
+      ratingCount: "420+", 
+      tag: "CHEF PICK", 
+      tagClass: "bg-primary-fixed text-on-primary-fixed", 
+      stockAlert: "• Only 4 left", 
+      stockAlertClass: "bg-error-container text-on-error-container", 
+      desc: "Golden fried spiced paneer chunks rolled in flaky parotta with buttery gravy.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1UyJXscqm2X_P640i_bAmESrOFWXIsRD_BFJwyLfhy284fN5h6l5eKpVFQ8xk6Z0NqOtS1Ge6pp5HgZvN5vtevKxXVWqYu7ULZhskfT0evLwl7c6kD1wQW5w-gtaYWBeT9WSzUBsQbPLR8SpvUYNoovck9gcVRX6SkBg2Ri7wQvOnbJ4QG5qzgFVFLsCDiqjV06LBlRVQCgEXdmD8JLpukN3i5ICYZFSaogr4gsb4WwIlz5I7fu5Zo7Ilo" 
+    },
+    { 
+      id: "chicken-club", 
+      name: "Smoky Grilled Chicken Club", 
+      category: "burgers", 
+      veg: false, 
+      price: 189, 
+      originalPrice: null, 
+      prepTime: "5m prep", 
+      rating: "4.8", 
+      ratingCount: "310", 
+      tag: "BESTSELLER", 
+      tagClass: "bg-primary-fixed text-on-primary-fixed", 
+      stockAlert: "• Ready Fast", 
+      stockAlertClass: "bg-secondary-container text-on-secondary-fixed", 
+      desc: "Triple decker seeded bread with smoked chicken breast, melted cheddar cheese & egg.", 
+      fastPrep: true, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1VLWdbtgxtpCZ--E2VtBKQeOrGKKxnG7LGQl4cTMpc54CSO-55WAC3yuGJZTn5E7XHdWnYgQ3__VP77oA0doKMXyS08sv_P_TYu1zGfFv1gk8yYL93Dj1G0txhsfTNshlrIxbx_Cu8Xiqa-0Px-mpCDGc31uX2bFTCk2NPDyiOfD_VlV7lwEUlnprrwpldgHO00gKzvdRqRNJoE1FMAwVT9v4nE5-mSJsOpS6ueLt9LKXjnsuY4JgEKLKE" 
+    },
+    { 
+      id: "schezwan-noodles", 
+      name: "Schezwan Veg Loaded Noodles", 
+      category: "chinese", 
+      veg: true, 
+      price: 119, 
+      originalPrice: null, 
+      prepTime: "8m prep", 
+      rating: "4.7", 
+      ratingCount: "189", 
+      tag: "SPICY", 
+      tagClass: "bg-error-container text-on-error-container", 
+      stockAlert: null, 
+      desc: "Wok-tossed hakka noodles with crisp bell peppers, cabbage, and fiery Schezwan glaze.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1Vm2iL1IuOsvZBBd_884io25bCrn4sKBZ8WU0feJTdffylxMHUXrB0YV8nBTbXpRg0iDSbK5ge3fo_zOax5ScOykeTaZjLcshknWrSkVhsVTlRFmVJqds3J1BLswtYrF9BfZNsjDfP_hpTpdxE9WI7m6jmPlfG6ZU74_kjUHY6mzQvgu_Qt7R9DO_WJuyNwjtLfJlmUxApwUec9NHAKSQQAEtX0q9C7_gV7jq96tKrScGAtIwuY9-7dFZ8" 
+    },
+    { 
+      id: "cold-coffee", 
+      name: "Classic Cold Coffee with Ice Cream", 
+      category: "shakes", 
+      veg: true, 
+      price: 89, 
+      originalPrice: null, 
+      prepTime: "3m prep", 
+      rating: "4.9", 
+      ratingCount: "650+", 
+      tag: "COLD BREW", 
+      tagClass: "bg-secondary-container text-on-secondary-fixed", 
+      stockAlert: "• Bestseller Drink", 
+      stockAlertClass: "bg-primary-fixed text-on-primary-fixed", 
+      desc: "Rich brewed dark chicory coffee blend whipped with thick cream and vanilla bean scoop.", 
+      fastPrep: true, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1UyJXscqm2X_P640i_bAmESrOFWXIsRD_BFJwyLfhy284fN5h6l5eKpVFQ8xk6Z0NqOtS1Ge6pp5HgZvN5vtevKxXVWqYu7ULZhskfT0evLwl7c6kD1wQW5w-gtaYWBeT9WSzUBsQbPLR8SpvUYNoovck9gcVRX6SkBg2Ri7wQvOnbJ4QG5qzgFVFLsCDiqjV06LBlRVQCgEXdmD8JLpukN3i5ICYZFSaogr4gsb4WwIlz5I7fu5Zo7Ilo" 
+    },
+    { 
+      id: "pizza-pocket", 
+      name: "Double Cheese Burst Pizza Pocket", 
+      category: "pizzas", 
+      veg: true, 
+      price: 99, 
+      originalPrice: null, 
+      prepTime: "6m prep", 
+      rating: "4.6", 
+      ratingCount: "94", 
+      tag: "HOT CHEESY", 
+      tagClass: "bg-primary-fixed text-on-primary-fixed", 
+      stockAlert: "• Last 2 Left!", 
+      stockAlertClass: "bg-error-container text-on-error-container", 
+      desc: "Golden herbed crust filled with mozzarella strings, sweet corn and tomato reduction.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1XJLkA4C2TRO3_iBNgQGJl75Nlmcijwtawd2lvWAcfSimf_vXLlqYL9zqCnX1za04LFQPJz5NR5j33zIcaCSxpGZBu8ea6OOHbn56OkI9cHXMZMjpDKM9vOv44sHghVNIOxKQXY8xf5RoiRwLoLo8-W7q1EYVu974AlDhty7UFScsPfP7M68tE9boJvS-7bqahmk9JoctJhQlf9Rp0uAgNm3VcWeCudAmqs2W3B0OQs0sR55qCa-zhMsN8" 
+    },
+    { 
+      id: "egg-roll", 
+      name: "Egg Mayo Roll", 
+      category: "rolls", 
+      veg: false, 
+      price: 99, 
+      originalPrice: null, 
+      prepTime: "5m prep", 
+      rating: "4.9", 
+      ratingCount: "157", 
+      tag: null, 
+      stockAlert: null, 
+      desc: "Tender and juicy non-veg delicacy prepared fresh to order.", 
+      fastPrep: true, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1Wj1cQDjJwL79zv7exVlq_DLHqhCdZJamw5jv3nSR9juzcVA3Xtip7WKC5_vQdgOlQsC2cqf9IWVJ176Yr0F99U0dItS-BslX-ndWRAbavZdNghIsfy5PlkIb3jrhyx2ZKkfww7EKJp8R9Pl_cN2GtU4fdg5M_ipdbGWkjvWiRO_a0rP2qEGWwbzXOiQ3-UkNIAjKv8qADK5oZZvR2GejEJYwVpKAGBeY1mx-DjJqkjj3bzlawjE2P9RlE" 
+    },
+    { 
+      id: "shawarma-wrap", 
+      name: "Chicken Shawarma Wrap", 
+      category: "rolls", 
+      veg: false, 
+      price: 159, 
+      originalPrice: 189, 
+      prepTime: "6m prep", 
+      rating: "4.4", 
+      ratingCount: "164", 
+      tag: "BESTSELLER", 
+      tagClass: "bg-primary-fixed text-on-primary-fixed", 
+      stockAlert: null, 
+      desc: "Tender and juicy non-veg delicacy prepared fresh to order.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1VLWdbtgxtpCZ--E2VtBKQeOrGKKxnG7LGQl4cTMpc54CSO-55WAC3yuGJZTn5E7XHdWnYgQ3__VP77oA0doKMXyS08sv_P_TYu1zGfFv1gk8yYL93Dj1G0txhsfTNshlrIxbx_Cu8Xiqa-0Px-mpCDGc31uX2bFTCk2NPDyiOfD_VlV7lwEUlnprrwpldgHO00gKzvdRqRNJoE1FMAwVT9v4nE5-mSJsOpS6ueLt9LKXjnsuY4JgEKLKE" 
+    },
+    { 
+      id: "mutton-seekh", 
+      name: "Spicy Mutton Seekh Roll", 
+      category: "rolls", 
+      veg: false, 
+      price: 189, 
+      originalPrice: null, 
+      prepTime: "8m prep", 
+      rating: "4.5", 
+      ratingCount: "171", 
+      tag: "CHEF PICK", 
+      tagClass: "bg-primary-fixed text-on-primary-fixed", 
+      stockAlert: null, 
+      desc: "Tender and juicy non-veg delicacy prepared fresh to order.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1XUtcaZqokAfiVv8Z5m2C6aHGejP7Svq1aB8cnmqLiuJIeCGAn8u2I-aQNPzM6hm2hZxdvDgREIwnM74u6PyhGyEPDPICYHC4qJIpX4KuLAN1w6aFOeujVUn9Nzfj3tT_LR8stSidF3iNTuciEbFFc4Ini7y0J-4Bu7OeOQy4_yfooF2lXUXFeumO8ZNm4ac3cKd5yAAUnueqTEd3GQUiYYu_Vo_X9h-VTvMgHgGzwlfgrBsUV_U2wGmPg" 
+    },
+    { 
+      id: "aloo-roll", 
+      name: "Aloo Jeera Kathi Roll", 
+      category: "rolls", 
+      veg: true, 
+      price: 79, 
+      originalPrice: null, 
+      prepTime: "4m prep", 
+      rating: "4.6", 
+      ratingCount: "178", 
+      tag: null, 
+      stockAlert: null, 
+      desc: "Fresh vegetarian campus delicacy seasoned with chef's specialty spice mix.", 
+      fastPrep: true, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1VNc0o4BrKhMlxDt3hpU3JaDrZHIUHUcYGe8S8WCjAsf_uj5eAaCaQQb0bL1660txlhuk074-mkJWGHqgpdYKFILPjnVu3jaPAsGxZjl-vI4Q5Te21_oYLJYuKs508b1WkdcfjQggij0LYNnRCBBCxkKuBnTDB8-tXdtapBW_ceCNEoCGDhz6PleNtPl3zIOqvZXpEdn1Q-h1H9D5WPGOnsosYrevR6t47XVI9jf0b35leqH8F0YbAS3Q" 
+    },
+    { 
+      id: "soya-roll", 
+      name: "Peri Peri Soya Chaap Roll", 
+      category: "rolls", 
+      veg: true, 
+      price: 129, 
+      originalPrice: 159, 
+      prepTime: "6m prep", 
+      rating: "4.7", 
+      ratingCount: "185", 
+      tag: null, 
+      stockAlert: null, 
+      desc: "Fresh vegetarian campus delicacy seasoned with chef's specialty spice mix.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1VNc0o4BrKhMlxDt3hpU3JaDrZHIUHUcYGe8S8WCjAsf_uj5eAaCaQQb0bL1660txlhuk074-mkJWGHqgpdYKFILPjnVu3jaPAsGxZjl-vI4Q5Te21_oYLJYuKs508b1WkdcfjQggij0LYNnRCBBCxkKuBnTDB8-tXdtapBW_ceCNEoCGDhz6PleNtPl3zIOqvZXpEdn1Q-h1H9D5WPGOnsosYrevR6t47XVI9jf0b35leqH8F0YbAS3Q" 
+    },
+    { 
+      id: "chicken-tikka-roll", 
+      name: "Chicken Tikka Paratha Roll", 
+      category: "rolls", 
+      veg: false, 
+      price: 169, 
+      originalPrice: null, 
+      prepTime: "7m prep", 
+      rating: "4.8", 
+      ratingCount: "192", 
+      tag: null, 
+      stockAlert: null, 
+      desc: "Tender and juicy non-veg delicacy prepared fresh to order.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1VLWdbtgxtpCZ--E2VtBKQeOrGKKxnG7LGQl4cTMpc54CSO-55WAC3yuGJZTn5E7XHdWnYgQ3__VP77oA0doKMXyS08sv_P_TYu1zGfFv1gk8yYL93Dj1G0txhsfTNshlrIxbx_Cu8Xiqa-0Px-mpCDGc31uX2bFTCk2NPDyiOfD_VlV7lwEUlnprrwpldgHO00gKzvdRqRNJoE1FMAwVT9v4nE5-mSJsOpS6ueLt9LKXjnsuY4JgEKLKE" 
+    },
+    { 
+      id: "chilli-paneer-wrap", 
+      name: "Chilli Paneer Crispy Wrap", 
+      category: "rolls", 
+      veg: true, 
+      price: 139, 
+      originalPrice: null, 
+      prepTime: "6m prep", 
+      rating: "4.9", 
+      ratingCount: "199", 
+      tag: null, 
+      stockAlert: null, 
+      desc: "Fresh vegetarian campus delicacy seasoned with chef's specialty spice mix.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1UyJXscqm2X_P640i_bAmESrOFWXIsRD_BFJwyLfhy284fN5h6l5eKpVFQ8xk6Z0NqOtS1Ge6pp5HgZvN5vtevKxXVWqYu7ULZhskfT0evLwl7c6kD1wQW5w-gtaYWBeT9WSzUBsQbPLR8SpvUYNoovck9gcVRX6SkBg2Ri7wQvOnbJ4QG5qzgFVFLsCDiqjV06LBlRVQCgEXdmD8JLpukN3i5ICYZFSaogr4gsb4WwIlz5I7fu5Zo7Ilo" 
+    },
+    { 
+      id: "dum-biryani", 
+      name: "Hyderabadi Dum Chicken Biryani", 
+      category: "bowls", 
+      veg: false, 
+      price: 199, 
+      originalPrice: null, 
+      prepTime: "5m prep", 
+      rating: "4.9", 
+      ratingCount: "241", 
+      tag: "BESTSELLER", 
+      tagClass: "bg-primary-fixed text-on-primary-fixed", 
+      stockAlert: null, 
+      desc: "Tender and juicy non-veg delicacy prepared fresh to order.", 
+      fastPrep: true, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1V5NIfF8j9pvdhp4rBIP6wyC5CFcjGlsTgzuWCQfef1WwLLWVWgT4vrveooL9abEjNylMdoI_Q4Sq9BHE4HTVj7N32pX0xjK3ZG89w-hHfQ1seGd0_eil7RxKynZEBybo3l-9qpRUyYt3XZQZnoRvYskTv_GeSjnTlSvQesrSm1CWJOmPgSZkvdiDhf-SqlLqRmFCJnCnGwm7VPQasx1r9iJpSrx2l8UugeAkQEsmeXx6vnvjfdskKLD70" 
+    },
+    { 
+      id: "rajma-chawal", 
+      name: "Kashmiri Rajma Chawal Bowl", 
+      category: "bowls", 
+      veg: true, 
+      price: 129, 
+      originalPrice: 159, 
+      prepTime: "4m prep", 
+      rating: "4.4", 
+      ratingCount: "248", 
+      tag: "CHEF PICK", 
+      tagClass: "bg-primary-fixed text-on-primary-fixed", 
+      stockAlert: null, 
+      desc: "Fresh vegetarian campus delicacy seasoned with chef's specialty spice mix.", 
+      fastPrep: true, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1Vm2iL1IuOsvZBBd_884io25bCrn4sKBZ8WU0feJTdffylxMHUXrB0YV8nBTbXpRg0iDSbK5ge3fo_zOax5ScOykeTaZjLcshknWrSkVhsVTlRFmVJqds3J1BLswtYrF9BfZNsjDfP_hpTpdxE9WI7m6jmPlfG6ZU74_kjUHY6mzQvgu_Qt7R9DO_WJuyNwjtLfJlmUxApwUec9NHAKSQQAEtX0q9C7_gV7jq96tKrScGAtIwuY9-7dFZ8" 
+    },
+    { 
+      id: "paneer-butter-rice", 
+      name: "Paneer Butter Masala Jeera Rice", 
+      category: "bowls", 
+      veg: true, 
+      price: 159, 
+      originalPrice: null, 
+      prepTime: "5m prep", 
+      rating: "4.6", 
+      ratingCount: "262", 
+      tag: null, 
+      stockAlert: null, 
+      desc: "Fresh vegetarian campus delicacy seasoned with chef's specialty spice mix.", 
+      fastPrep: true, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1UyJXscqm2X_P640i_bAmESrOFWXIsRD_BFJwyLfhy284fN5h6l5eKpVFQ8xk6Z0NqOtS1Ge6pp5HgZvN5vtevKxXVWqYu7ULZhskfT0evLwl7c6kD1wQW5w-gtaYWBeT9WSzUBsQbPLR8SpvUYNoovck9gcVRX6SkBg2Ri7wQvOnbJ4QG5qzgFVFLsCDiqjV06LBlRVQCgEXdmD8JLpukN3i5ICYZFSaogr4gsb4WwIlz5I7fu5Zo7Ilo" 
+    },
+    { 
+      id: "chole-bhature", 
+      name: "Chole Bhature Platter Bowl", 
+      category: "bowls", 
+      veg: true, 
+      price: 119, 
+      originalPrice: null, 
+      prepTime: "6m prep", 
+      rating: "4.8", 
+      ratingCount: "276", 
+      tag: null, 
+      stockAlert: "• Fast Prep", 
+      stockAlertClass: "bg-secondary-container text-on-secondary-fixed", 
+      desc: "Fresh vegetarian campus delicacy seasoned with chef's specialty spice mix.", 
+      fastPrep: false, 
+      image: "https://lh3.googleusercontent.com/aida/AEtjO1XJLkA4C2TRO3_iBNgQGJl75Nlmcijwtawd2lvWAcfSimf_vXLlqYL9zqCnX1za04LFQPJz5NR5j33zIcaCSxpGZBu8ea6OOHbn56OkI9cHXMZMjpDKM9vOv44sHghVNIOxKQXY8xf5RoiRwLoLo8-W7q1EYVu974AlDhty7UFScsPfP7M68tE9boJvS-7bqahmk9JoctJhQlf9Rp0uAgNm3VcWeCudAmqs2W3B0OQs0sR55qCa-zhMsN8" 
+    }
+  ];
+
+  // Synthesize 100+ items with resilient images
+  function getFullCatalog() {
+    const list = [...MENU_ITEMS];
+    const categories = ['rolls', 'bowls', 'burgers', 'pizzas', 'chinese', 'breakfast', 'shakes', 'desserts'];
+    for (let i = 1; i <= 85; i++) {
+      const cat = categories[i % categories.length];
+      const isVeg = i % 2 === 0;
+      const baseItem = MENU_ITEMS[i % MENU_ITEMS.length];
+      list.push({
+        id: `gen-item-${i}`,
+        name: isVeg ? `Campus Delicacy Combo #${i}` : `Spiced Chicken Special #${i}`,
+        category: cat,
+        veg: isVeg,
+        price: 80 + (i * 3 % 140),
+        originalPrice: i % 3 === 0 ? 120 + (i * 2 % 80) : null,
+        prepTime: `${3 + (i % 6)}m prep`,
+        rating: (4.4 + ((i % 6) / 10)).toFixed(1),
+        ratingCount: `${100 + i * 5}`,
+        tag: i % 4 === 0 ? "POPULAR" : null,
+        tagClass: "bg-primary-fixed text-on-primary-fixed",
+        stockAlert: i % 5 === 0 ? "• Fast Prep" : null,
+        stockAlertClass: "bg-secondary-container text-on-secondary-fixed",
+        desc: isVeg ? "Fresh vegetarian campus delicacy seasoned with chef's specialty spice mix." : "Tender and juicy non-veg delicacy prepared fresh to order.",
+        fastPrep: (3 + (i % 6)) <= 5,
+        image: baseItem.image
+      });
+    }
+    return list;
+  }
+
+  const ALL_ITEMS = getFullCatalog();
+
+  // App State
+  const state = {
+    cart: {
+      "paneer-roll": 1,
+      "schezwan-noodles": 1,
+      "cold-coffee": 1
+    },
+    pureVegOnly: false,
+    selectedCategory: "all",
+    selectedFilter: "all",
+    searchQuery: "",
+    couponApplied: true,
+    couponAmount: 35.00,
+    packagingFee: 15.00,
+    receiptMethod: "whatsapp",
+    paymentMethod: "wallet",
+    phone: "9820154321",
+    displayLimit: 16
+  };
+
+  function showToast(msg, icon = "check_circle") {
+    const toast = document.getElementById('toastNotification');
+    document.getElementById('toastMsg').textContent = msg;
+    document.getElementById('toastIcon').textContent = icon;
+    toast.classList.remove('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+      toast.classList.remove('opacity-100', 'translate-y-0');
+    }, 2000);
+  }
+
+  // PHONE NUMBER EVENT HANDLERS
+  function handlePhoneInput(val) {
+    const clean = val.replace(/\D/g, '').slice(0, 10);
+    state.phone = clean;
+    const desktopInput = document.getElementById('user-phone-input');
+    const mobileInput = document.getElementById('user-phone-input-mobile');
+    if (desktopInput && desktopInput.value !== clean) desktopInput.value = clean;
+    if (mobileInput && mobileInput.value !== clean) mobileInput.value = clean;
+    const counter = document.getElementById('phoneCharCount');
+    if (counter) counter.textContent = `${clean.length}/10`;
+  }
+
+  function clearPhoneNumber() {
+    handlePhoneInput('');
+    const input = document.getElementById('user-phone-input');
+    if (input) input.focus();
+    showToast('Phone number cleared', 'backspace');
+  }
+
+  function toggleNumpad() {
+    const pad = document.getElementById('quickNumpadTray');
+    if (pad) pad.classList.toggle('hidden');
+  }
+
+  function tapNumpad(key) {
+    if (key === 'backspace') {
+      handlePhoneInput(state.phone.slice(0, -1));
+    } else if (key === 'sample') {
+      handlePhoneInput('9820154321');
+      showToast('Sample phone filled (+91 98201 54321)');
+    } else {
+      if (state.phone.length < 10) {
+        handlePhoneInput(state.phone + key);
+      }
+    }
+  }
+
+  function setReceiptMethod(method) {
+    state.receiptMethod = method;
+    const labelWa = document.getElementById('label-receipt-wa');
+    const labelSms = document.getElementById('label-receipt-sms');
+    if (method === 'whatsapp') {
+      labelWa.className = 'flex items-center gap-1.5 p-2 rounded-xl border-2 border-secondary bg-surface-container-lowest cursor-pointer shadow-2xs transition-all';
+      labelSms.className = 'flex items-center gap-1.5 p-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest cursor-pointer shadow-2xs transition-all';
+      showToast('Receipt will be sent via WhatsApp PDF', 'chat');
+    } else {
+      labelSms.className = 'flex items-center gap-1.5 p-2 rounded-xl border-2 border-primary bg-surface-container-lowest cursor-pointer shadow-2xs transition-all';
+      labelWa.className = 'flex items-center gap-1.5 p-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest cursor-pointer shadow-2xs transition-all';
+      showToast('Receipt will be sent via SMS Text', 'sms');
+    }
+  }
+
+  function selectPayment(mode) {
+    state.paymentMethod = mode;
+    ['wallet', 'upi', 'cash'].forEach(m => {
+      const btn = document.getElementById(`pay-${m}`);
+      if (!btn) return;
+      if (m === mode) {
+        btn.className = 'pay-btn p-2 rounded-xl border-2 border-primary bg-primary-fixed/40 text-left transition-all cursor-pointer';
+      } else {
+        btn.className = 'pay-btn p-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-left hover:border-primary transition-all cursor-pointer';
+      }
+    });
+  }
+
+  // CART OPERATIONS
+  function addToCart(id) {
+    state.cart[id] = (state.cart[id] || 0) + 1;
+    updateAll();
+    const item = ALL_ITEMS.find(x => x.id === id);
+    showToast(`Added ${item ? item.name : 'item'} to tray`);
+  }
+
+  function decreaseCart(id) {
+    if (!state.cart[id]) return;
+    if (state.cart[id] <= 1) {
+      delete state.cart[id];
+    } else {
+      state.cart[id]--;
+    }
+    updateAll();
+    showToast('Updated tray');
+  }
+
+  function clearCart() {
+    state.cart = {};
+    updateAll();
+    showToast('Tray cleared', 'delete_sweep');
+  }
+
+  function toggleCoupon() {
+    state.couponApplied = !state.couponApplied;
+    const btn = document.getElementById('toggleCouponBtn');
+    if (state.couponApplied) {
+      btn.textContent = 'Applied (-₹35)';
+      btn.className = 'text-xs font-bold text-secondary px-2 py-1 rounded bg-surface-container-lowest border border-secondary/40 hover:bg-secondary-container/40 transition-colors cursor-pointer';
+      showToast('Coupon CAMPUS20 applied (-₹35)');
+    } else {
+      btn.textContent = 'Apply Coupon';
+      btn.className = 'text-xs font-bold text-slate-500 px-2 py-1 rounded bg-surface-container-low border border-slate-300 hover:bg-slate-200 transition-colors cursor-pointer';
+      showToast('Coupon removed');
+    }
+    updateBillCalculations();
+  }
+
+  function updateBillCalculations() {
+    let subtotal = 0;
+    let itemCount = 0;
+    Object.keys(state.cart).forEach(id => {
+      const item = ALL_ITEMS.find(x => x.id === id);
+      const qty = state.cart[id];
+      if (item && qty > 0) {
+        subtotal += item.price * qty;
+        itemCount += qty;
+      }
+    });
+
+    const discount = (state.couponApplied && subtotal > 199) ? state.couponAmount : 0;
+    const packaging = subtotal > 0 ? state.packagingFee : 0;
+    const taxable = Math.max(0, subtotal - discount + packaging);
+    const gstRate = 0.05;
+    const totalGst = taxable * gstRate;
+    const cgst = totalGst / 2;
+    const sgst = totalGst / 2;
+    const grandTotal = taxable + totalGst;
+
+    document.getElementById('trayItemCount').textContent = itemCount;
+    document.getElementById('mobTrayCount').textContent = itemCount;
+    document.getElementById('mobileCartBadge').textContent = itemCount;
+
+    const formattedGrand = `₹${grandTotal.toFixed(2)}`;
+    document.getElementById('trayHeaderTotal').textContent = formattedGrand;
+    document.getElementById('billGrandTotal').textContent = formattedGrand;
+    document.getElementById('mobTrayTotal').textContent = formattedGrand;
+    document.getElementById('mobGrandTotal').textContent = formattedGrand;
+    document.getElementById('payBtnLabel').textContent = `Pay ${formattedGrand} & Place Order`;
+    document.getElementById('mobPayBtnLabel').textContent = `Pay ${formattedGrand} & Place Order`;
+
+    document.getElementById('billSubtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('mobSubtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('billPackaging').textContent = `₹${packaging.toFixed(2)}`;
+    document.getElementById('billDiscount').textContent = `-₹${discount.toFixed(2)}`;
+    document.getElementById('mobDiscount').textContent = `-₹${discount.toFixed(2)}`;
+    document.getElementById('billTaxable').textContent = `₹${taxable.toFixed(2)}`;
+    document.getElementById('billCgst').textContent = `₹${cgst.toFixed(2)}`;
+    document.getElementById('billSgst').textContent = `₹${sgst.toFixed(2)}`;
+    document.getElementById('billTotalGst').textContent = `₹${totalGst.toFixed(2)}`;
+    document.getElementById('mobGst').textContent = `₹${totalGst.toFixed(2)}`;
+
+    // Receipt modal updates
+    document.getElementById('receiptSubtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('receiptDiscount').textContent = `-₹${discount.toFixed(2)}`;
+    document.getElementById('receiptTaxable').textContent = `₹${taxable.toFixed(2)}`;
+    document.getElementById('receiptCgst').textContent = `₹${cgst.toFixed(2)}`;
+    document.getElementById('receiptSgst').textContent = `₹${sgst.toFixed(2)}`;
+    document.getElementById('receiptTotalGst').textContent = `₹${totalGst.toFixed(2)}`;
+    document.getElementById('receiptGrandTotal').textContent = formattedGrand;
+    document.getElementById('modalPaidAmount').textContent = formattedGrand;
+  }
+
+  function renderCartList() {
+    const list = document.getElementById('cartItemList');
+    const mobList = document.getElementById('mobileCartItemList');
+    const receiptList = document.getElementById('receiptItemList');
+    if (!list) return;
+
+    list.innerHTML = '';
+    mobList.innerHTML = '';
+    receiptList.innerHTML = '';
+
+    const cartKeys = Object.keys(state.cart);
+    if (cartKeys.length === 0) {
+      list.innerHTML = '<div class="text-center py-6 text-on-surface-variant text-xs"><span class="material-symbols-outlined text-3xl mb-1 text-slate-300">shopping_cart</span><p>Your tray is empty.</p></div>';
+      mobList.innerHTML = '<div class="text-center py-4 text-xs text-slate-400">Tray is empty</div>';
+      receiptList.innerHTML = '<div class="text-xs text-slate-400 py-2">No items</div>';
+      return;
+    }
+
+    cartKeys.forEach(id => {
+      const item = ALL_ITEMS.find(x => x.id === id);
+      const qty = state.cart[id];
+      if (!item || qty <= 0) return;
+
+      const itemTotal = item.price * qty;
+
+      // Desktop Cart Item
+      const el = document.createElement('div');
+      el.className = 'pt-2 flex items-center justify-between';
+      el.innerHTML = `
+        <div class="min-w-0 flex-1 pr-2">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="w-2.5 h-2.5 rounded-full ${item.veg ? 'bg-emerald-600' : 'bg-red-600'} shrink-0"></span>
+            <span class="text-xs font-bold text-on-surface truncate">${item.name}</span>
+          </div>
+          <span class="text-[11px] text-on-surface-variant">₹${item.price} each</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-on-surface w-14 text-right">₹${itemTotal}</span>
+          <div class="flex items-center bg-surface-container-high rounded-full px-1.5 py-0.5 border border-outline-variant/30">
+            <button class="w-5 h-5 flex items-center justify-center font-bold text-xs hover:text-primary cursor-pointer" onclick="decreaseCart('${item.id}')">-</button>
+            <span class="w-5 text-center text-xs font-bold">${qty}</span>
+            <button class="w-5 h-5 flex items-center justify-center font-bold text-xs hover:text-primary cursor-pointer" onclick="addToCart('${item.id}')">+</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(el);
+
+      // Mobile Cart Item
+      const mEl = document.createElement('div');
+      mEl.className = 'pt-1.5 flex justify-between items-center';
+      mEl.innerHTML = `
+        <span class="truncate font-medium">${qty}x ${item.name}</span>
+        <span class="font-bold shrink-0 ml-2">₹${itemTotal}</span>
+      `;
+      mobList.appendChild(mEl);
+
+      // Receipt Item
+      const rEl = document.createElement('div');
+      rEl.className = 'pt-1.5 flex justify-between items-center';
+      rEl.innerHTML = `
+        <div>
+          <span class="font-semibold text-slate-800">${item.name}</span>
+          <span class="text-[10px] text-slate-400 block">${qty} × ₹${item.price}</span>
+        </div>
+        <span class="font-bold text-slate-900">₹${itemTotal}</span>
+      `;
+      receiptList.appendChild(rEl);
+    });
+  }
+
+  function renderFoodGrid() {
+    const grid = document.getElementById('foodGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const filtered = ALL_ITEMS.filter(item => {
+      if (state.pureVegOnly && !item.veg) return false;
+      if (state.selectedCategory !== 'all' && item.category !== state.selectedCategory) return false;
+      if (state.selectedFilter === 'special' && item.tag !== 'CHEF PICK') return false;
+      if (state.selectedFilter === 'bestseller' && item.tag !== 'BESTSELLER') return false;
+      if (state.selectedFilter === 'under99' && item.price >= 99) return false;
+      if (state.selectedFilter === 'fast' && !item.fastPrep) return false;
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        return item.name.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q);
+      }
+      return true;
+    });
+
+    const visibleItems = filtered.slice(0, state.displayLimit);
+    document.getElementById('itemsRatioBadge').textContent = `${filtered.length} Dishes`;
+    document.getElementById('remainingDishesCount').textContent = Math.max(0, filtered.length - state.displayLimit);
+
+    visibleItems.forEach(item => {
+      const qty = state.cart[item.id] || 0;
+      const card = document.createElement('div');
+      card.className = 'bg-surface-container-lowest rounded-2xl p-3 border border-outline-variant/30 shadow-xs hover:border-primary/50 transition-all flex justify-between gap-3';
+      
+      let stepperBtn = `
+        <button class="w-full py-1.5 px-3 rounded-full bg-primary-container text-white text-xs font-bold hover:bg-tertiary-container active:scale-95 transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer" onclick="addToCart('${item.id}')">
+          <span class="material-symbols-outlined text-[15px]">add</span> ADD
+        </button>
+      `;
+
+      if (qty > 0) {
+        stepperBtn = `
+          <div class="flex items-center justify-between w-full bg-primary-container text-white rounded-full px-2 py-1 shadow-xs">
+            <button class="w-5 h-5 flex items-center justify-center font-bold text-sm active:scale-90 cursor-pointer" onclick="decreaseCart('${item.id}')">-</button>
+            <span class="font-extrabold text-xs">${qty}</span>
+            <button class="w-5 h-5 flex items-center justify-center font-bold text-sm active:scale-90 cursor-pointer" onclick="addToCart('${item.id}')">+</button>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="flex-1 min-w-0 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-1.5 mb-1 flex-wrap">
+              <span class="w-3.5 h-3.5 rounded border ${item.veg ? 'border-emerald-600' : 'border-red-600'} flex items-center justify-center p-[1.5px]">
+                <span class="w-2 h-2 ${item.veg ? 'bg-emerald-600 rounded-full' : 'bg-red-600 transform rotate-45'} inline-block"></span>
+              </span>
+              <span class="text-[10px] font-semibold text-on-surface-variant flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[12px]">schedule</span> ${item.prepTime}
+              </span>
+              ${item.tag ? `<span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${item.tagClass || 'bg-primary-fixed text-on-primary-fixed'}">${item.tag}</span>` : ''}
+              ${item.stockAlert ? `<span class="px-1.5 py-0.2 rounded text-[9px] font-semibold ${item.stockAlertClass || 'bg-error-container text-on-error-container'}">${item.stockAlert}</span>` : ''}
+            </div>
+            <h4 class="font-bold text-xs sm:text-sm text-on-surface leading-snug line-clamp-1">${item.name}</h4>
+            <p class="text-[11px] text-on-surface-variant line-clamp-2 mt-1">${item.desc}</p>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="font-extrabold text-sm text-on-surface">₹${item.price}</span>
+            ${item.originalPrice ? `<span class="text-[11px] text-on-surface-variant line-through">₹${item.originalPrice}</span>` : ''}
+            <span class="text-[10px] font-bold text-amber-500 ml-auto">★ ${item.rating} (${item.ratingCount})</span>
+          </div>
+        </div>
+        <div class="w-28 sm:w-32 shrink-0 flex flex-col items-center">
+          <div class="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 mb-2">
+            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_FOOD_IMG}';"/>
+          </div>
+          ${stepperBtn}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function updateAll() {
+    renderCartList();
+    updateBillCalculations();
+    renderFoodGrid();
+  }
+
+  // Filter & Search Handlers
+  function toggleVegOnly(val) {
+    state.pureVegOnly = val;
+    renderFoodGrid();
+    showToast(val ? 'Showing pure vegetarian dishes only' : 'Showing all items (veg & non-veg)');
+  }
+
+  function selectCategory(cat, btn) {
+    state.selectedCategory = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => {
+      b.className = 'cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs shrink-0 cursor-pointer hover:bg-surface-container-low transition-all active:scale-95';
+    });
+    btn.className = 'cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-container text-white shadow-xs shrink-0 cursor-pointer transition-all active:scale-95';
+    renderFoodGrid();
+  }
+
+  function applyFilterTag(filter, btn) {
+    state.selectedFilter = filter;
+    document.querySelectorAll('.pill-btn').forEach(b => {
+      b.className = 'pill-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant text-xs font-semibold whitespace-nowrap active:scale-95 transition-all border border-outline-variant/40 shadow-xs hover:border-primary cursor-pointer';
+    });
+    btn.className = 'pill-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold whitespace-nowrap active:scale-95 transition-all border border-primary/20 shadow-xs cursor-pointer';
+    renderFoodGrid();
+  }
+
+  function handleSearch(val) {
+    state.searchQuery = val;
+    const desktopInput = document.getElementById('searchInput');
+    const mobileInput = document.getElementById('mobileSearchInput');
+    if (desktopInput && desktopInput.value !== val) desktopInput.value = val;
+    if (mobileInput && mobileInput.value !== val) mobileInput.value = val;
+
+    const clearBtn = document.getElementById('clearSearch');
+    if (clearBtn) {
+      if (val.length > 0) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+    }
+    renderFoodGrid();
+  }
+
+  function clearSearchInput() {
+    handleSearch('');
+  }
+
+  function loadMoreItems() {
+    state.displayLimit += 16;
+    renderFoodGrid();
+    showToast('Loaded more dishes');
+  }
+
+  // ORDER SUBMISSION & RECEIPT DISPATCH WORKFLOW
+  function processOrder() {
+    const phoneInput = document.getElementById('user-phone-input');
+    const enteredPhone = phoneInput ? phoneInput.value.trim() : state.phone;
+
+    if (!enteredPhone || enteredPhone.length < 10) {
+      showToast('Please enter a valid 10-digit phone number', 'error');
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
+
+    const orderModal = document.getElementById('orderModal');
+    const phoneTarget = document.getElementById('modalPhoneTarget');
+    const receiptPhone = document.getElementById('receiptPhoneDetail');
+    const dispatchedIcon = document.getElementById('dispatchedIcon');
+    const dispatchedTitle = document.getElementById('dispatchedTitle');
+
+    const formattedTarget = `+91 ${enteredPhone}`;
+    if (phoneTarget) phoneTarget.textContent = formattedTarget;
+    if (receiptPhone) receiptPhone.textContent = formattedTarget;
+
+    if (state.receiptMethod === 'whatsapp') {
+      dispatchedIcon.textContent = 'verified';
+      dispatchedIcon.parentElement.className = 'w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5';
+      dispatchedTitle.innerHTML = '<span>E-Receipt dispatched via WhatsApp to:</span>';
+    } else {
+      dispatchedIcon.textContent = 'sms';
+      dispatchedIcon.parentElement.className = 'w-8 h-8 rounded-full bg-primary-fixed text-primary flex items-center justify-center shrink-0 mt-0.5';
+      dispatchedTitle.innerHTML = '<span>E-Receipt dispatched via SMS to:</span>';
+    }
+
+    orderModal.classList.remove('hidden');
+    showToast(`Order placed for Table B-14!`, 'send');
+  }
+
+  function closeOrderModal() {
+    document.getElementById('orderModal').classList.add('hidden');
+  }
+
+  function openReceiptModal() {
+    closeOrderModal();
+    document.getElementById('receiptModal').classList.remove('hidden');
+  }
+
+  function closeReceiptModal() {
+    document.getElementById('receiptModal').classList.add('hidden');
+  }
+
+  function toggleMobileDrawer() {
+    const body = document.getElementById('mobDrawerBody');
+    const chevron = document.getElementById('mobChevron');
+    if (body.classList.contains('hidden')) {
+      body.classList.remove('hidden');
+      chevron.textContent = 'expand_more';
+    } else {
+      body.classList.add('hidden');
+      chevron.textContent = 'expand_less';
+    }
+  }
+
+  // Initialization
+  window.addEventListener('DOMContentLoaded', () => {
+    updateAll();
+  });
+</script>
+</body></html>
